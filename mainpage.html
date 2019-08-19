@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MainPage</title>
+<meta charset=”UTF-8”>
+<script src="https://rawgit.com/aws/amazon-cognito-identity-js/master/dist/aws-cognito-sdk.min.js"></script>
+<script src="https://rawgit.com/aws/amazon-cognito-identity-js/master/dist/amazon-cognito-identity.min.js"></script>
+<script src="https://code.jquery.com/jquery-latest.min.js"
+type="text/javascript"></script>
+<link href="StyleSheet.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<div id="mainContainer"></div>
+<div id="userInputContainer"></div>
+
+</body>
+
+<script type="text/javascript">
+	var URL = "https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi"
+	
+    var poolData = {
+        UserPoolId: 'eu-west-2_W1x2jEB34',
+        ClientId: '4ud7glj90uhjdugl5r6lek9uj6'
+    };
+    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    var cognitoUser = userPool.getCurrentUser();
+
+//GET SESSION
+cognitoUser.getSession(function(err, session) {
+            if (err) {
+                alert(err.message || JSON.stringify(err));
+                return;
+            }});
+
+var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+
+async function mainFunction(cognitoUser){ 
+	// Promise 
+	const p = new Promise((res, rej)=>{  cognitoUser.getUserAttributes(function(err, result) {
+		if (err) {
+		    rej(err)
+		    return   
+		} //get the email from result.
+		res(result[2].getValue())     
+	}) })
+	//wait till done.
+	let useremail = await p
+
+
+	var user = hashes[0]
+	console.log(user)
+
+	if (user == "param=admin"){
+		/*GETS ALL USERDATA* - admin*/
+		getTableItems("https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi", user, useremail)
+	}
+
+	else if (user == "param=secondClassCitizen"){
+		createUserInputField(useremail, user);
+	}
+
+
+};
+
+
+function getTableItems(URL, user, useremail) {
+		/*GET DATA*/
+		var xmlhttp, responseObj, txt = ""
+		xmlhttp = new XMLHttpRequest();
+		xmlhttp.onreadystatechange = function() {
+			if (this.readyState == 4 && this.status == 200 && user == "param=admin") {
+				responseObj = JSON.parse(this.responseText);
+				txt += "<table id='t01'>";
+				txt += "<tr><th>Email</th> <th>ticketID</th> <th>Feedback</th> <th>Status</th> <th>Actions</th></tr>"
+				for (element in responseObj["Items"]) {
+				    txt += "<tr><td>" + responseObj["Items"][element].email + "</td>";
+				    txt += "<td>" + responseObj["Items"][element].ticketID + "</td>";
+				    txt += "<td>" + responseObj["Items"][element].feedback + "</td>";
+				    txt += "<td>" + responseObj["Items"][element].confirmation + "</td>";
+					txt += "<td><button onClick='confirmTableItem(this.id)' class='buttonStyle button2' id= " +"'" + responseObj["Items"][element].email +"jmioscemioiodjfjirijseriojsefisejfecrmjseril234234"+ responseObj["Items"][element].ticketID +"'"+ "class='buttonStyle'>Confirm</button><button onClick='deleteTableItem(this.id, \"https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi\","+"\"" +user +"\"" +",\""+useremail+"\""+")' class='buttonStyle button2' id= " +"'" + responseObj["Items"][element].email +"jmioscemioiodjfjirijseriojsefisejfecrmjseril234234"+ responseObj["Items"][element].ticketID +"'"+ ">Delete</button></td></tr>"
+				}
+				txt += "</table>"
+				document.getElementById("mainContainer").innerHTML = txt;
+			}
+			else if (this.readyState == 4 && this.status == 200 && user == "param=secondClassCitizen"){
+				responseObj = JSON.parse(this.responseText);
+				txt += "<button  class=\"buttonStyle button2\" onClick=\"createUserInputField("+"'" + useremail + "'" + ","+ "'" + user+ "'"+")\">GO BACK</button></p>"
+				txt += "<table id='t01'>";
+				txt += "<tr><th>Email</th> <th>ticketID</th> <th>Feedback</th> <th>Status</th> <th>Actions</th></tr>"
+				for (element in responseObj["Items"]) {
+					if (responseObj["Items"][element].email == useremail) {   
+					    txt += "<tr><td>" + responseObj["Items"][element].email + "</td>";
+					    txt += "<td>" + responseObj["Items"][element].ticketID + "</td>";
+					    txt += "<td>" + responseObj["Items"][element].feedback + "</td>";
+					    txt += "<td>" + responseObj["Items"][element].confirmation + "</td>";
+						txt += "<td><button onClick='deleteTableItem(this.id, " + "\"https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi\","+"\"" +user +"\"" +",\""+useremail+"\""+")' class='buttonStyle button2' id= " +"'" + responseObj["Items"][element].email +"jmioscemioiodjfjirijseriojsefisejfecrmjseril234234"+ responseObj["Items"][element].ticketID +"'"+ ">Delete</button></td></tr>"
+					} else { continue }
+				}
+				txt += "</table> <p>"
+				document.getElementById("mainContainer").innerHTML = txt;
+			}
+		}
+		xmlhttp.open("GET", URL, true);
+		xmlhttp.send();
+	}
+
+function createUserInputField(useremail, user){
+	
+
+	txt = "<h2>Write your feedback</h2><textarea id='userinputarea' placeholder='Enter your text..'></textarea>"; //Okey
+	txt += "<p><button class='buttonStyle'";
+	txt +=  "onClick = 'submitFunction(" + "\"" + useremail + "\""; 
+	txt += ",document.getElementById(\"userinputarea\").value)";
+	txt += "'>Submit</button>";
+	txt += "<button  class=\"buttonStyle button2\" onClick=\"getTableItems(" +"'https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi'" +"," + "'" + user + "'" + ","+ "'" + useremail+ "'"+")\">GetData</button></p>";
+	
+	document.getElementById("mainContainer").innerHTML = txt;
+}
+
+function submitFunction(useremail, feedback) {
+	var inputJSON = {
+		"email": useremail,
+		"feedback": feedback
+	}
+	$.ajax({
+      type: "POST",
+      url : "https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi",
+      dataType: "json",
+      crossDomain: "true",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(inputJSON),
+     
+    success: function () {
+        // clear form and show a success message
+        alert("Successful");
+        location.reload();
+      },
+    error: function () {
+        // show an error message
+        alert("UnSuccessful");
+    }});
+}
+function deleteTableItem(buttonID, URL, user, useremail) {
+		/*DELETE DATA*/
+
+		var inputJSON = {
+			"email": buttonID.split("jmioscemioiodjfjirijseriojsefisejfecrmjseril234234")[0],
+			"ticketID": parseInt(buttonID.split("jmioscemioiodjfjirijseriojsefisejfecrmjseril234234")[1], 10)
+		}
+		
+		$.ajax({
+	      type: "DELETE",
+	      url : "https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi",
+	      dataType: "json",
+	      crossDomain: "true",
+	      contentType: "application/json; charset=utf-8",
+	      data: JSON.stringify(inputJSON),
+	     
+	    success: function () {
+	        // clear form and show a success message
+	        console.log(user, useremail)
+	        getTableItems("https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi", user, useremail);
+	      },
+	    error: function () {
+	        // show an error message
+	        alert("UnSuccessful");
+	    }});
+
+	}
+
+function confirmTableItem(buttonID) {
+		/*CONFIRM ITEM*/
+		var inputJSON = {
+			"email": buttonID.split("jmioscemioiodjfjirijseriojsefisejfecrmjseril234234")[0],
+			"ticketID": parseInt(buttonID.split("jmioscemioiodjfjirijseriojsefisejfecrmjseril234234")[1], 10)
+		}
+		
+		$.ajax({
+	      type: "PUT",
+	      url : "https://w0t8ufmr7l.execute-api.eu-west-2.amazonaws.com/v1/bemresurssi",
+	      dataType: "json",
+	      crossDomain: "true",
+	      contentType: "application/json; charset=utf-8",
+	      data: JSON.stringify(inputJSON),
+	     
+	    success: function () {
+	        // clear form and show a success message
+	        window.location.reload();
+	      },
+	    error: function () {
+	        // show an error message
+	        alert("UnSuccessful");
+	    }});
+
+	}
+mainFunction(cognitoUser)
+
+</script>
+</html>

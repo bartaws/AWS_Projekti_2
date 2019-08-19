@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>SignIn</title>
+
+<meta charset=”UTF-8”>
+<script src="https://rawgit.com/aws/amazon-cognito-identity-js/master/dist/aws-cognito-sdk.min.js"></script>
+<script src="https://rawgit.com/aws/amazon-cognito-identity-js/master/dist/amazon-cognito-identity.min.js"></script>
+<script src="https://code.jquery.com/jquery-latest.min.js"
+type="text/javascript"></script>
+<link href="StyleSheet.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<style type="text/css">
+	#buttonContainer {
+		background-color: #0074E1;
+		width: 400px;
+		height: 600px;
+		margin: 0 auto;
+		position: relative;
+		top:100px;
+		border-radius: 10px;
+		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	}
+
+	.mybuttonstyle{
+	  background-color: #F79E02;
+	  border: none;
+	  color: white;
+	  padding: 15px 32px;
+	  text-align: center;
+	  text-decoration: none;
+	  display: inline-block;
+	  font-size: 60px;
+	  border-radius: 12px;
+	  position: relative;
+	  top:200px;
+	  left: 80px;
+	  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	}
+		.mybuttonstyle2{
+	  background-color: #F79E02;
+	  border: none;
+	  color: white;
+	  padding: 15px 32px;
+	  text-align: center;
+	  text-decoration: none;
+	  display: inline-block;
+	  font-size: 15px;
+	  border-radius: 12px;
+	  position: relative;
+	  top:200px;
+	  left: 80px;
+	  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	}
+	#youAreUser {
+		position: relative;
+		right: 20px;
+	}
+	.mybuttonstyle:active {
+  		background-color: #F75569; /* Green */
+  		color: white;
+		}
+
+	.form-group{
+		width: 300px;
+		color: white;
+		font-size: 50px;
+		position: relative;
+		left:30px;
+		top: 20px;
+		font-family: Arial;
+	}
+
+	input {
+		font-size: 20px;
+		width: 100%;
+		padding: 4px;
+	}
+
+	.rightbutton {
+		position: relative;
+		margin-left: 10px;
+	}
+
+	.mybuttonstyle2:active {
+	  background-color: #F75569; /* Green */
+	  color: white;
+	}
+
+
+</style>
+<div id="buttonContainer">
+	<button class= "mybuttonstyle" id="youAreAdmin" onClick="areUadminOrUser('admin')">Admin</button>
+	<p><button class= "mybuttonstyle" id="youAreUser" onClick="areUadminOrUser('secondClassCitizen')">User</button></p>
+</div>
+
+</body>
+
+<script>
+
+/*ASK IF ADMIN OR USER*/
+
+function areUadminOrUser(userType){
+	var txt="";
+	txt += "<div class=\"container\"> <form> <div class=\"form-group\"><label ref=\"username\">Username:</label><input id=\"username\" type=\"text\" maxlength=\"50\"/></div><div class=\"form-group\"><label ref=\"password\">Password:</label><input id=\"password\" type=\"password\" maxlength=\"150\"/></div><button type=\"button\" class=\"mybuttonstyle2\" onclick=\"window.UserAPP.login()\">Login</button><button type=\"button\" class=\"mybuttonstyle2 rightbutton\" onclick=\"window.location=\'signup.html\'\">Sign Up</button></form></div>"
+	
+	document.getElementById("buttonContainer").innerHTML = txt;
+
+	var UserAPP = window.UserAPP || {};
+
+	UserAPP.login = function () {
+
+	    var poolData = {
+	        UserPoolId: 'eu-west-2_W1x2jEB34',
+	        ClientId: '4ud7glj90uhjdugl5r6lek9uj6'
+	    };
+	    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);    
+	    var username =  $('#username').val();
+	        var authenticationData = {
+	            Username: username,
+	            Password: $('#password').val()
+	        };
+
+	        var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+	        var userData = {
+	            Username: username,
+	            Pool: userPool
+	        };
+	        var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+	        
+	        cognitoUser.authenticateUser(authenticationDetails, {
+	            onSuccess: function () {
+	                window.location = 'mainpage.html' + '?param=' + userType;
+	            },
+	            onFailure: function (err) {
+	                alert(err);
+	            }
+	        });
+	    };
+}
+</script>
+</html>

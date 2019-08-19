@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>BEMA</title>
+<meta charset=”UTF-8”>
+<script src="https://code.jquery.com/jquery-latest.min.js"
+type="text/javascript"></script>
+<script src="https://rawgit.com/aws/amazon-cognito-identity-js/master/dist/aws-cognito-sdk.min.js"></script>
+<script src="https://rawgit.com/aws/amazon-cognito-identity-js/master/dist/amazon-cognito-identity.min.js"></script>
+</head>
+<style type="text/css">
+    #buttonContainer {
+        background-color: #0074E1;
+        width: 400px;
+        height: 600px;
+        margin: 0 auto;
+        position: relative;
+        top:100px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .mybuttonstyle{
+      background-color: #F79E02;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 60px;
+      border-radius: 12px;
+      position: relative;
+      top:200px;
+      left: 80px;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+        .mybuttonstyle2{
+      background-color: #F79E02;
+      border: none;
+      color: white;
+      padding: 15px 32px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 30px;
+      border-radius: 12px;
+      position: relative;
+      top:80px;
+      left: 25px;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+
+    .form-group{
+        width: 300px;
+        color: white;
+        font-size: 50px;
+        position: relative;
+        left:30px;
+        top: 20px;
+        font-family: Arial;
+    }
+
+    input {
+        font-size: 30px;
+        width: 100%;
+    }
+
+    .rightbutton {
+        position: relative;
+        margin-left: 10px;
+    }
+
+    .mybuttonstyle2:active {
+      background-color: #F75569; /* Green */
+      color: white;
+    }
+</style>
+<script>
+var UserAPP = window.UserAPP || {};
+UserAPP.confirm = function () {
+        var poolData = {
+            UserPoolId: 'eu-west-2_W1x2jEB34',
+            ClientId: '4ud7glj90uhjdugl5r6lek9uj6'
+        };
+        var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+        var username = location.hash.substring(1);
+        //var username = "minna";
+        var cognitoUser = new AmazonCognitoIdentity.CognitoUser({
+            Username: username,
+            Pool: userPool
+        });
+        cognitoUser.confirmRegistration($('#code').val(), true, function (err, results) {
+            if (err) {
+                alert(err);
+            } else {
+                window.location = 'signin.html';
+            }
+        });
+    };
+</script>
+<div id="buttonContainer">
+    <form>
+        <div class="form-group">
+            <label ref="code">Code:</label>
+            <input id="code" type="text" maxlength="20"/>
+        </div>
+        <button type="button" class="mybuttonstyle2" onclick="window.UserAPP.confirm()">Confirm</button>
+        <button type="button" class="mybuttonstyle2 rightbutton" onclick="window.UserAPP.resend()">Resend</button>
+    </form>
+</div>
+</html>
